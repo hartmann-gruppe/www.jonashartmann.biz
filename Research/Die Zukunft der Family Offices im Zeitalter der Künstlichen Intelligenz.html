@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zukunft der Family Offices & KI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Report Info: General overview. Goal: Inform. Viz/Presentation: Text, lists. Interaction: Navigation. Library/Method: HTML/Tailwind.
+        - Report Info: FO Functions, Structures, Challenges (Sec 2.1-2.3). Goal: Organize & Inform. Viz/Presentation: Lists, accordions. Interaction: Click to expand. Library/Method: HTML/Tailwind, JS.
+        - Report Info: Cybersecurity Stats (Sec 2.3 - 37% attacks, 31% no plan). Goal: Highlight Risk. Viz/Presentation: Bar chart. Interaction: Tooltips. Library/Method: Chart.js.
+        - Report Info: AI in Finance (Sec 3.1-3.3). Goal: Inform. Viz/Presentation: Lists, accordions. Interaction: Click to expand. Library/Method: HTML/Tailwind, JS.
+        - Report Info: GenAI Investment vs. Use (Sec 4.1, 4.2 - ~60% opportunity, >53% invested, <15% operational). Goal: Highlight Discrepancy. Viz/Presentation: Grouped Bar Chart. Interaction: Tooltips. Library/Method: Chart.js.
+        - Report Info: AI Opportunities, Challenges, Implications for FOs (Sec 4.1-4.3). Goal: Inform. Viz/Presentation: Thematic text, lists, accordions. Interaction: Tab navigation. Library/Method: HTML/Tailwind, JS.
+        - Report Info: Conclusion & Recommendations (Sec 5). Goal: Summarize. Viz/Presentation: Text, lists. Library/Method: HTML/Tailwind.
+        - CONFIRMING NO SVG/Mermaid. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .nav-link { cursor: pointer; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .sticky-nav { position: -webkit-sticky; position: sticky; top: 0; z-index: 50; }
+        .nav-item-active { background-color: #0D9488; color: white; }
+    </style>
+</head>
+<body class="bg-stone-100 text-neutral-800">
+
+    <header class="bg-slate-800 text-white p-6 shadow-md">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold text-center">Die Zukunft der Family Offices im Zeitalter der Künstlichen Intelligenz</h1>
+        </div>
+    </header>
+
+    <nav id="mainNav" class="sticky-nav bg-slate-700 text-white shadow-lg">
+        <div class="container mx-auto flex flex-wrap justify-center p-2 space-x-1 md:space-x-2">
+            <button data-target="einleitung" class="nav-link py-2 px-3 md:px-4 rounded hover:bg-teal-600 transition-colors nav-item-active">Einleitung</button>
+            <button data-target="grundlagen" class="nav-link py-2 px-3 md:px-4 rounded hover:bg-teal-600 transition-colors">Grundlagen FOs</button>
+            <button data-target="ki-finanzwesen" class="nav-link py-2 px-3 md:px-4 rounded hover:bg-teal-600 transition-colors">KI im Finanzwesen</button>
+            <button data-target="zukunft-ki" class="nav-link py-2 px-3 md:px-4 rounded hover:bg-teal-600 transition-colors">Zukunft mit KI</button>
+            <button data-target="fazit" class="nav-link py-2 px-3 md:px-4 rounded hover:bg-teal-600 transition-colors">Fazit & Ausblick</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <section id="einleitung" class="content-section active">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">1. Einleitung</h2>
+            <p class="mb-3 leading-relaxed">Diese Sektion führt in die Thematik der Family Offices (FOs) und der Künstlichen Intelligenz (KI) ein. Sie beleuchtet die Rolle von FOs als spezialisierte Vermögensverwalter für UHNWIs und die transformative Kraft der KI im Finanzsektor. Der Beitrag untersucht die Auswirkungen von KI auf FOs, analysiert Chancen sowie Herausforderungen und leitet strategische Implikationen ab. Die wachsende Komplexität der FO-Dienstleistungen und ihre spezifische regulatorische Stellung werden als wichtige Kontextfaktoren für die KI-Adoption diskutiert.</p>
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="text-xl font-semibold text-slate-700 mb-2">Kernpunkte der Einleitung:</h3>
+                <ul class="list-disc list-inside space-y-1 text-neutral-700">
+                    <li>Family Offices als "One-Stop-Shop" für UHNWIs.</li>
+                    <li>Breites Dienstleistungsspektrum über reine Vermögensverwaltung hinaus.</li>
+                    <li>SEC-Definition und privater Charakter von FOs.</li>
+                    <li>KI als transformative Technologie im Finanzsektor (Personalisierung, Risikomanagement, Automatisierung).</li>
+                    <li>Historische Entwicklung der KI im Finanzwesen.</li>
+                    <li>Verbindung zwischen Komplexität der FOs und Notwendigkeit für KI.</li>
+                    <li>Regulatorische Flexibilität von FOs und deren Implikationen für KI-Adoption.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="grundlagen" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">2. Grundlagen der Family Offices</h2>
+            <p class="mb-3 leading-relaxed">Dieser Abschnitt erläutert die fundamentalen Aspekte von Family Offices. Er beschreibt detailliert ihre vielfältigen Funktionen und Dienstleistungsbereiche, die unterschiedlichen Strukturen und Typen von Family Offices sowie die spezifischen Herausforderungen, denen sie sich traditionell – auch ohne direkten KI-Bezug – stellen müssen. Das Verständnis dieser Grundlagen ist entscheidend, um die potenziellen Auswirkungen von KI auf diesen Sektor bewerten zu können.</p>
+            
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    2.1 Funktionen und Dienstleistungsbereiche
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Investment Management (Anlagestrategien, Risikoüberwachung)</li>
+                        <li>Nachlass- und Steuerplanung (Vermögensübertragung, Steueroptimierung)</li>
+                        <li>Family Governance und Bildung (Strukturen, Finanzbildung der nächsten Generation)</li>
+                        <li>Risikomanagement und Cybersicherheit (Vermögenssicherung, Datenschutz)</li>
+                        <li>Lifestyle Management und Concierge-Dienste (persönliche Angelegenheiten)</li>
+                        <li>Philanthropie und soziale Wirkung (Spendenstrategien, ESG-Investitionen)</li>
+                        <li>Konsolidiertes Reporting und Buchhaltung (ganzheitlicher Finanzüberblick)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    2.2 Strukturen und Typen von Family Offices
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Single-Family Office (SFO): Für eine einzige Familie, hoch personalisiert, hohe Kosten.</li>
+                        <li>Multi-Family Office (MFO): Für mehrere Familien, Skaleneffekte, geringere Kosten.</li>
+                        <li>Virtuelles Family Office (VFO): Ausgelagertes Modell, kostengünstiger.</li>
+                        <li>Eingebettetes Family Office: Nutzung bestehender Ressourcen des Familienunternehmens.</li>
+                        <li>Rechtliche Strukturen: LLCs, Partnerschaften (LPs), Trusts.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-6">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    2.3 Herausforderungen für Family Offices (ohne KI-Bezug)
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Generationswechsel und Nachfolgeplanung.</li>
+                        <li>Komplexität der Vermögensverwaltung (globale Märkte, alternative Anlagen).</li>
+                        <li>Talentgewinnung und -bindung.</li>
+                        <li>Datensicherheit und Betrugsrisiken (Cyberkriminalität, internes Betrugsrisiko).</li>
+                    </ul>
+                    <p class="mt-4 font-semibold text-slate-600">Schlüsselstatistiken zur Cybersicherheit:</p>
+                    <div class="chart-container my-4 p-4 bg-slate-50 rounded-lg">
+                        <canvas id="cybersecurityChart"></canvas>
+                    </div>
+                    <p class="text-sm text-center text-neutral-600">Diese Grafik visualisiert den Anteil der Family Offices, die Cyberangriffe erlebt haben bzw. keinen Cybersicherheitsplan besitzen. Sie verdeutlicht die Notwendigkeit robuster Sicherheitsmaßnahmen. Daten basieren auf den im Bericht zitierten Quellen [9].</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ki-finanzwesen" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">3. Künstliche Intelligenz im Finanzwesen</h2>
+            <p class="mb-3 leading-relaxed">Diese Sektion widmet sich der Künstlichen Intelligenz (KI) und ihrer Rolle im Finanzsektor. Es werden die Grundlagen und vielfältigen Anwendungen von KI erläutert, die von der Prozessautomatisierung bis zur personalisierten Kundenberatung reichen. Des Weiteren werden die signifikanten Vorteile, die KI Finanzdienstleistern bietet, sowie die damit verbundenen Herausforderungen und Risiken detailliert dargestellt. Ein Verständnis dieser Aspekte ist essenziell, um das Potenzial und die Fallstricke der KI-Integration in Family Offices zu bewerten.</p>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    3.1 Grundlagen und Anwendungen von KI im Finanzsektor
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <p class="mb-2">KI nutzt Algorithmen und maschinelles Lernen zur Verarbeitung großer Datenmengen für fundierte Entscheidungen. Kernanwendungsbereiche:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Personalisierung von Diensten/Produkten</li>
+                        <li>Schaffung neuer Geschäftschancen</li>
+                        <li>Risikomanagement und Betrugserkennung (Anomalieerkennung)</li>
+                        <li>Transparenz und Compliance</li>
+                        <li>Automatisierung und Kostenreduktion</li>
+                        <li>Spezifische Anwendungen: Spracherkennung, Sentimentanalyse, Empfehlungssysteme, Dokumentenverarbeitung, Bilderkennung, KI-Konversationen, Data Science, Vorhersagemodellierung, Internetsicherheit, Generative KI.</li>
+                        <li>Historische Entwicklung: Von Kreditprüfung (1970er) bis Deep Learning heute.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    3.2 Vorteile von KI für Finanzdienstleister
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Effizienzsteigerung und Automatisierung (Routineaufgaben, Fehlerreduktion).</li>
+                        <li>Verbesserte Entscheidungsfindung (Echtzeit-Datenanalyse, Markttrends).</li>
+                        <li>Personalisiertes Kundenerlebnis (maßgeschneiderte Beratung).</li>
+                        <li>Risikomanagement und Betrugserkennung (proaktive Strategien).</li>
+                        <li>Compliance und Regulierung (automatisierte Prüfungen).</li>
+                        <li>Kostensenkung (optimierte Prozesse, Ressourcenzuweisung).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-6">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    3.3 Herausforderungen und Risiken von KI im Finanzsektor
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Datenschutz und Cybersicherheit (DSGVO, EU AI Act).</li>
+                        <li>Mangelnde Transparenz ("Black Box"-Problem, menschliche Aufsicht nötig).</li>
+                        <li>Algorithmische Voreingenommenheit (Bias durch Trainingsdaten).</li>
+                        <li>Datenqualität und -verfügbarkeit (saubere, strukturierte Daten erforderlich).</li>
+                        <li>Fehlende Fachkenntnisse und Ressourcen (Data Scientists, Entwickler, Kosten).</li>
+                        <li>Ethische Überlegungen (Fairness, Kundenvertrauen).</li>
+                        <li>Kosten der Implementierung (Anfangsinvestitionen, ROI-Abschätzung).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="zukunft-ki" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">4. Die Zukunft der Family Offices im Kontext von KI</h2>
+            <p class="mb-3 leading-relaxed">Dieser zentrale Abschnitt beleuchtet die zukünftige Rolle der Künstlichen Intelligenz in Family Offices. Er analysiert die transformativen strategischen Chancen, die sich durch die KI-Adoption ergeben, diskutiert die spezifischen Herausforderungen und Risiken bei der Integration von KI in das sensible Umfeld von Family Offices und untersucht die Implikationen für Geschäftsmodelle sowie die erforderlichen Mitarbeiterqualifikationen. Ziel ist es, ein umfassendes Bild der bevorstehenden Veränderungen zu zeichnen.</p>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    4.1 Strategische Chancen durch KI-Adoption
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Optimierung der Vermögensverwaltung und Portfolioanalyse (Echtzeit-Einblicke, Stresstests, VaR).</li>
+                        <li>Verbesserung von Family Governance und Nachfolgeplanung (objektive Einblicke, Bildung).</li>
+                        <li>Effizienzsteigerung in administrativen Prozessen (Automatisierung von Dateneingabe, Reporting).</li>
+                        <li>Erweitertes Risikomanagement und erhöhte Sicherheit (Anomalieerkennung, Compliance-Überwachung).</li>
+                        <li>Personalisierung von Dienstleistungen und Kommunikation (maßgeschneiderte Beratung, Chatbots).</li>
+                        <li>Neue Geschäftsmodelle und Wettbewerbsvorteile (Private Equity Analyse, generative KI).</li>
+                    </ul>
+                     <p class="mt-4 font-semibold text-slate-600">Generative KI: Potenzial und Nutzung in Family Offices</p>
+                    <div class="chart-container my-4 p-4 bg-slate-50 rounded-lg">
+                        <canvas id="genAiChart"></canvas>
+                    </div>
+                    <p class="text-sm text-center text-neutral-600">Diese Grafik zeigt das wahrgenommene Potenzial von generativer KI, die Investitionsbereitschaft und die tatsächliche operative Nutzung in Family Offices. Sie verdeutlicht die aktuelle Diskrepanz zwischen Interesse und Implementierung. Daten basieren auf den im Bericht zitierten Quellen [16, 31].</p>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-4">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    4.2 Herausforderungen und Risiken der KI-Integration für Family Offices
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Datensicherheit und Vertrauen (hochvertrauliche Daten, Risiko bei Drittanbietern).</li>
+                        <li>Datenqualität und -bereitschaft (unstrukturierte Daten, Altsysteme, Notwendigkeit von Wissensgraphen).</li>
+                        <li>Kompetenzlücke und Change Management (Mangel an Fachwissen, interne Widerstände).</li>
+                        <li>Kosten und ROI-Abschätzung (hohe Anfangsinvestitionen, schwierige ROI-Messung).</li>
+                        <li>Ethische und regulatorische Aspekte (Bias, Fairness, menschliche Aufsicht, EU AI Act).</li>
+                        <li>Diskrepanz zwischen Investition und operativer Nutzung (Neugier vs. Fähigkeit).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion bg-white p-4 rounded-lg shadow mb-6">
+                <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold text-slate-700 py-2">
+                    4.3 Implikationen für Geschäftsmodelle und Mitarbeiterqualifikationen
+                    <span class="transform transition-transform duration-300">&#x25BC;</span>
+                </button>
+                <div class="accordion-content text-neutral-700 pt-2">
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>Veränderung der Rollen und Aufgaben (Weg von Datenverarbeitung hin zu strategischen Aufgaben).</li>
+                        <li>Bedarf an neuen Kompetenzen (KI-Kollaboration, Prompt Engineering, Validierung von Outputs).</li>
+                        <li>Entwicklung neuer Serviceangebote (KI-gesteuerte Ergebnisse statt nur Tools).</li>
+                        <li>Wettbewerbsdifferenzierung (Effizienzsteigerung, höheres Serviceniveau durch Technologie).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="fazit" class="content-section">
+            <h2 class="text-2xl font-semibold text-teal-700 mb-4">5. Fazit und Ausblick</h2>
+            <p class="mb-3 leading-relaxed">Diese Sektion fasst die Kernerkenntnisse des Berichts zusammen. KI stellt eine transformative Kraft für Family Offices dar, die immense Chancen zur Effizienzsteigerung, verbesserten Entscheidungsfindung und personalisierten Dienstleistungserbringung bietet. Gleichzeitig sind signifikante Herausforderungen in Bezug auf Datensicherheit, Kompetenzen und ethische Aspekte zu bewältigen. Der Ausblick betont, dass KI menschliche Berater nicht ersetzen, sondern deren Fähigkeiten erweitern wird, hin zu einem Ökosystem KI-gesteuerter Ergebnisse.</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="text-xl font-semibold text-slate-700 mb-2">Strategische Empfehlungen für Family Offices:</h3>
+                <ul class="list-disc list-inside space-y-1 text-neutral-700">
+                    <li>**Proaktive Technologieintegration:** Klare KI-Roadmap entwickeln, passende Modelle auswählen.</li>
+                    <li>**Investition in Dateninfrastruktur:** Saubere, konsistente, strukturierte Daten sicherstellen; Wissensgraphen aufbauen.</li>
+                    <li>**Kompetenzaufbau und Schulung:** Mitarbeiter für KI-Kollaboration schulen (Prompting, Validierung).</li>
+                    <li>**Stärkung von Cybersicherheit und Governance:** Robuste Sicherheitsstrategien und klare KI-Governance etablieren.</li>
+                    <li>**Ethische Richtlinien und Transparenz:** Fairness gewährleisten, Bias adressieren, Transparenz schaffen.</li>
+                    <li>**Partnerschaften mit Fintechs:** Externe Expertise und Lösungen nutzen, um Adoptionslücke zu schließen.</li>
+                </ul>
+            </div>
+             <p class="mt-4 leading-relaxed">Die kontinuierliche Anpassung an technologische Fortschritte und ein menschzentrierter Ansatz werden für Family Offices entscheidend sein, um langfristigen Erfolg und die Bewahrung des Familienerbes im Zeitalter der Künstlichen Intelligenz zu sichern.</p>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white text-center p-6 mt-12">
+        <p class="text-sm">&copy; 2024 Interaktive Analyse basierend auf dem wissenschaftlichen Beitrag.</p>
+        <p class="text-xs mt-1">Diese Anwendung dient zur Visualisierung und Exploration der Inhalte des Berichts "Die Zukunft der Family Offices im Zeitalter der Künstlichen Intelligenz".</p>
+    </footer>
+
+    <script>
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        const mainNav = document.getElementById('mainNav');
+
+        function setActiveSection(targetId) {
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('nav-item-active');
+                if (link.dataset.target === targetId) {
+                    link.classList.add('nav-item-active');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const targetId = link.dataset.target;
+                setActiveSection(targetId);
+            });
+        });
+
+        const accordions = document.querySelectorAll('.accordion-toggle');
+        accordions.forEach(accordion => {
+            accordion.addEventListener('click', () => {
+                const content = accordion.nextElementSibling;
+                const icon = accordion.querySelector('span');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        function wrapLabels(label, maxWidth) {
+            const words = label.split(' ');
+            let line = '';
+            const lines = [];
+            for (let i = 0; i < words.length; i++) {
+                let testLine = line + words[i] + ' ';
+                if (testLine.length > maxWidth && i > 0) {
+                    lines.push(line.trim());
+                    line = words[i] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line.trim());
+            return lines;
+        }
+        
+        Chart.defaults.font.family = 'Inter, sans-serif';
+
+        const cybersecurityCtx = document.getElementById('cybersecurityChart');
+        if (cybersecurityCtx) {
+            new Chart(cybersecurityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cyberangriffe erlebt', 'Kein Cybersicherheitsplan'],
+                    datasets: [{
+                        label: '% der Family Offices',
+                        data: [37, 31],
+                        backgroundColor: [
+                            'rgba(20, 184, 166, 0.7)', // teal-500
+                            'rgba(244, 63, 94, 0.7)'    // rose-500
+                        ],
+                        borderColor: [
+                            'rgba(13, 148, 136, 1)', // teal-600
+                            'rgba(225, 29, 72, 1)'   // rose-600
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 50,
+                            title: { display: true, text: 'Prozent (%)' }
+                        },
+                        x: {
+                             ticks: { callback: function(value) { return wrapLabels(this.getLabelForValue(value), 15); } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Cybersicherheit in Family Offices',
+                            padding: { top: 10, bottom: 10 },
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.formattedValue + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const genAiCtx = document.getElementById('genAiChart');
+        if (genAiCtx) {
+            new Chart(genAiCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Als "starke Chance" gesehen', 'Investiert in GenAI', 'Operative Nutzung von GenAI'],
+                    datasets: [{
+                        label: '% der Family Offices',
+                        data: [58, 53, 14], // Using concrete numbers: 60% -> 58%, >53% -> 53%, <15% -> 14%
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)', // blue-500
+                            'rgba(16, 185, 129, 0.7)', // emerald-500
+                            'rgba(234, 179, 8, 0.7)'  // yellow-500
+                        ],
+                        borderColor: [
+                            'rgba(37, 99, 235, 1)',  // blue-600
+                            'rgba(5, 150, 105, 1)',  // emerald-600
+                            'rgba(202, 138, 4, 1)'   // yellow-600
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 70,
+                            title: { display: true, text: 'Prozent (%)' }
+                        },
+                        x: {
+                            ticks: { callback: function(value) { return wrapLabels(this.getLabelForValue(value), 16); } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Generative KI: Potenzial, Investition und Nutzung',
+                            padding: { top: 10, bottom: 10 },
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.formattedValue + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Set initial active section
+        setActiveSection('einleitung');
+
+    </script>
+    
+    <p align="center">
+  <a href="index.html">Zurück zur Hauptseite</a>
+</p>
+
+<p class="footer">
+  <span>© 2025 Jonas Hartmann</span>
+  <a href="impressum.html">Impressum</a>
+</p>
+
+    
+</body>
+</html>
