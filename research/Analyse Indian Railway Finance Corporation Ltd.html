@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Aktienanalyse: IRFC (INE053F01010)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Unternehmensübersicht: Text, Key Facts als Liste. Ziel: Informieren. Methode: HTML-Text.
+        - Eigentümerstruktur: Kuchendiagramm (Chart.js). Ziel: Proportionen zeigen. Methode: Chart.js. Interaktion: Tooltips.
+        - Finanzielle Leistungsanalyse (Tabelle 1): Liniendiagramme für Umsatz, PAT, Gesamtvermögen, Gesamtkapital über GJ2021-GJ2025. Ziel: Trends zeigen. Methode: Chart.js. Interaktion: Tooltips.
+        - Wichtige Finanzkennzahlen (Tabelle 2): Dynamische Darstellung als Key-Value-Paare oder kleine Karten. Ziel: Informieren. Methode: HTML-Text.
+        - Aktienkursentwicklung (Vergleich, Tabelle 4): Balkendiagramm für vergleichende Renditen (IRFC vs. Nifty50, Sensex, Branche, Sektor). Ziel: Vergleichen. Methode: Chart.js. Interaktion: Tooltips.
+        - Dividendenhistorie (Tabelle 5): HTML-Tabelle. Ziel: Informieren. Methode: HTML-Tabelle.
+        - Risiken & Chancen: Aufklappbare Textabschnitte oder Karten. Ziel: Detaillierte Information. Methode: HTML/JS für Interaktion.
+        - Bewertung (Tabelle 6): Vergleichstabelle. Ziel: Vergleichen. Methode: HTML-Tabelle.
+        - Analystenprognosen: Textliche Zusammenfassung der divergierenden Meinungen. Ziel: Informieren. Methode: HTML-Text.
+        Rechtfertigung: Die gewählten Visualisierungen und Präsentationsmethoden sind darauf ausgelegt, die jeweiligen Datenpunkte klar und verständlich darzustellen und die im Bericht hervorgehobenen Erkenntnisse zu unterstützen. Chart.js wird für alle Diagramme verwendet. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F3; /* Warm off-white */
+            color: #333333; /* Dark Gray */
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #4A90E2; /* Calm Blue */
+            color: #4A90E2;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Default max-width, can be overridden by Tailwind */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px;
+            }
+        }
+        h1, h2, h3 {
+            color: #2c3e50; /* Darker shade for headings */
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-item:hover {
+            border-bottom-color: #A0A0A0; /* Medium Gray */
+            color: #333333;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.875rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-2">Interaktive Aktienanalyse: Indian Railway Finance Corporation Ltd (IRFC)</h1>
+            <p class="text-lg text-gray-700">ISIN: INE053F01010</p>
+        </header>
+
+        <nav class="mb-8 sticky top-0 bg-white/80 backdrop-blur-md shadow-md z-50 rounded-lg">
+            <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="relative flex items-center justify-center h-16 overflow-x-auto">
+                    <div class="flex space-x-1 sm:space-x-2 lg:space-x-4">
+                        <button data-tab="overview" class="tab-button nav-item active">Überblick</button>
+                        <button data-tab="businessModel" class="tab-button nav-item">Geschäftsmodell</button>
+                        <button data-tab="financials" class="tab-button nav-item">Finanzleistung</button>
+                        <button data-tab="stockPerformance" class="tab-button nav-item">Aktien-Performance</button>
+                        <button data-tab="industry" class="tab-button nav-item">Branche & Wettbewerb</button>
+                        <button data-tab="risksOpportunities" class="tab-button nav-item">Risiken & Chancen</button>
+                        <button data-tab="valuation" class="tab-button nav-item">Bewertung & Ausblick</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section id="overview" class="tab-content">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">I. Executive Summary</h2>
+                    <p class="text-gray-700 leading-relaxed">Dieser Bericht bietet eine umfassende Analyse der Indian Railway Finance Corporation Ltd (IRFC), einem zentralen Akteur in der Finanzierung der indischen Eisenbahninfrastruktur. Die IRFC, erkennbar an der ISIN INE053F01010, ist der dedizierte Finanzierungsarm der Indischen Eisenbahnen und profitiert von einer starken staatlichen Unterstützung, die ihr ein stabiles und risikoarmes Kerngeschäft sichert. Historisch gesehen hat das Unternehmen eine robuste finanzielle Leistung und eine beeindruckende langfristige Aktienrendite gezeigt. Jüngste Kursvolatilitäten und eine strategische Neuausrichtung hin zu einer Diversifizierung des Geschäftsmodells prägen jedoch das aktuelle Bild. Die Analyse beleuchtet sowohl die inhärenten Stärken der IRFC als auch die neuen Risiken, die mit der Entwicklung ihres Geschäftsmodells einhergehen, und bietet eine ausgewogene Einschätzung ihres Investitionspotenzials.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">II. Unternehmensübersicht</h2>
+                    <h3 class="text-xl font-semibold mb-3">Einführung</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">Die Indian Railway Finance Corporation Ltd (IRFC) ist ein staatliches Unternehmen (PSU) und der dedizierte Finanzierungsarm der Indischen Eisenbahnen. Sie ist als Non-Deposit Taking Non-Banking Financial Company (NBFC) und Infrastructure Finance Company (NBFC-IFC) klassifiziert und genießt den Status eines Miniratna I sowie Schedule 'A' Public Sector Enterprise unter der Kontrolle des indischen Eisenbahnministeriums.</p>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Historie und Meilensteine</h3>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed mb-4">
+                        <li>Gründung: 12. Dezember 1986.</li>
+                        <li>Beginn Kapitalbeschaffung: 1987-88.</li>
+                        <li>Börsengang (IPO): 18. Januar 2021 (Volumen: 4.633,38 Cr ₹, Ausgabepreis: 26 ₹).</li>
+                        <li>Notierung NSE & BSE: 29. Januar 2021.</li>
+                        <li>Navaratna-Status: Verliehen im März 2025 (26. PSU). Dieser Status verleiht größere finanzielle und operative Autonomie, was Entscheidungsprozesse beschleunigen und unabhängiges Wachstum fördern kann.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold mb-3">Eigentümerstruktur (März 2025)</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">Die indische Regierung hält eine Mehrheitsbeteiligung. Der vergleichsweise geringe Anteil von FPIs und Investmentfonds könnte auf eine Bewertung der langfristigen Auswirkungen der Diversifizierungsstrategie hindeuten oder darauf, dass Stabilität und Dividenden zwar geboten werden, aber aggressiveres Wachstumspotenzial begrenzt erscheint.</p>
+                    <div class="chart-container mx-auto h-80 sm:h-96 max-w-md">
+                        <canvas id="ownershipChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2 text-center">Eigentümerstruktur der IRFC zum März 2025.</p>
+
+                    <h3 class="text-xl font-semibold mt-6 mb-3">Schlüsselmanagement und Vorstand</h3>
+                    <p class="text-gray-700 leading-relaxed">Manoj Kumar Dubey (oder Uma Ranade) wird als Chairman & MD genannt. Shelly Verma ist Director (Finance). Der Vorstand umfasst auch Nominee Directors und unabhängige Direktoren. Laufende Änderungen in der Geschäftsleitung sind zu beobachten.</p>
+                </div>
+            </section>
+
+            <section id="businessModel" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">III. Geschäftsmodell und Operationen</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">Das Hauptziel der IRFC ist die Deckung des "Extra Budgetary Resources" (EBR)-Bedarfs der indischen Eisenbahnen durch Kapitalbeschaffung zu wettbewerbsfähigen Konditionen. Dies umfasst die Finanzierung von Rollmaterial und das Leasing von Eisenbahninfrastruktur.</p>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Kerngeschäft: Finanzierung und Leasing</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">IRFC hat ca. 75% des gesamten Rollmaterialbestands der Indischen Eisenbahnen finanziert (13.764 Lokomotiven, 76.735 Personenwagen, 265.815 Güterwagen). Im GJ 2019 finanzierte IRFC 39,38% der Investitionsausgaben der Indischen Eisenbahnen.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Das 30-jährige Finanzierungsleasingmodell (15 Jahre primär, 15 Jahre sekundär) sichert vorhersehbare Einnahmequellen und reduziert Kreditrisiken, was eine Kernstärke darstellt.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Finanzierungsmechanismus</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">Mittelbeschaffung durch Anleihen und Kredite (In- & Ausland). Wettbewerbsfähige Zinssätze dank exzellenter Kreditratings (CRISIL AAA/A1+, ICRA AAA/A1+).</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Regulierte Kreditmargen (z.B. 40 Basispunkte für Rollmaterial, 35 bps für Projektanlagen) sichern stabile Gewinne, begrenzen aber Margenausweitungspotenzial. Dies motiviert die Diversifizierungsstrategie.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Strategische Rolle</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">IRFC ist der "alleinige Marktarm" der Indischen Eisenbahnen für die Deckung des außerbudgetären Ressourcenbedarfs.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Diversifizierungsstrategie</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">Erschließung neuer Geschäftsfelder: Leasing an andere Unternehmen, Finanzierung von Eisenbahn-JVs, Güterkorridore, multimodale Logistikpfade, erneuerbare Energien (z.B. Darlehen an NTPC Green Energy), Kohlelogistik.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Erwartung: 3-5x höhere Zinsspannen bei nicht-eisenbahnbezogenen Darlehen (aktuell <1% der AUM). Dies ist ein Versuch, die Rentabilität zu steigern, verändert aber das Risikoprofil durch Wettbewerb (REC, PFC) und potenzielle Kreditrisiken/Steueränderungen.</p>
+                </div>
+            </section>
+
+            <section id="financials" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">IV. Finanzielle Leistungsanalyse</h2>
+                    <p class="text-gray-700 leading-relaxed mb-6">Die IRFC hat in den letzten Geschäftsjahren ein konstantes Wachstum bei Umsatz und Nettogewinn gezeigt, oft über dem Branchendurchschnitt, mit außergewöhnlich hohen operativen Gewinnmargen (typischerweise um 99%). Diese Effizienz ist auf ihr Großkreditmodell zurückzuführen.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Historische Finanzkennzahlen (GJ2021-GJ2025)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="chart-container h-72 sm:h-80 md:h-[350px] max-w-full">
+                             <p class="text-center font-medium text-gray-700 mb-1">Gesamtumsatz (₹ Cr)</p>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                        <div class="chart-container h-72 sm:h-80 md:h-[350px] max-w-full">
+                            <p class="text-center font-medium text-gray-700 mb-1">Gewinn nach Steuern (PAT) (₹ Cr)</p>
+                            <canvas id="patChart"></canvas>
+                        </div>
+                        <div class="chart-container h-72 sm:h-80 md:h-[350px] max-w-full">
+                            <p class="text-center font-medium text-gray-700 mb-1">Gesamtvermögen (₹ Cr)</p>
+                            <canvas id="assetsChart"></canvas>
+                        </div>
+                        <div class="chart-container h-72 sm:h-80 md:h-[350px] max-w-full">
+                            <p class="text-center font-medium text-gray-700 mb-1">Gesamtkapital (₹ Cr)</p>
+                            <canvas id="equityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left">Kennzahl</th>
+                                    <th class="py-2 px-4 border-b text-right">GJ 2021</th>
+                                    <th class="py-2 px-4 border-b text-right">GJ 2022</th>
+                                    <th class="py-2 px-4 border-b text-right">GJ 2023</th>
+                                    <th class="py-2 px-4 border-b text-right">GJ 2024</th>
+                                    <th class="py-2 px-4 border-b text-right">GJ 2025</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="py-2 px-4 border-b">Gesamtumsatz (₹ Cr)</td><td class="py-2 px-4 border-b text-right">15.770,86</td><td class="py-2 px-4 border-b text-right">20.301,60</td><td class="py-2 px-4 border-b text-right">23.932,63</td><td class="py-2 px-4 border-b text-right">26.655,92</td><td class="py-2 px-4 border-b text-right">27.156,41</td></tr>
+                                <tr><td class="py-2 px-4 border-b">PAT (₹ Cr)</td><td class="py-2 px-4 border-b text-right">4.416,13</td><td class="py-2 px-4 border-b text-right">6.089,84</td><td class="py-2 px-4 border-b text-right">6.337,01</td><td class="py-2 px-4 border-b text-right">6.412,10</td><td class="py-2 px-4 border-b text-right">6.502,00</td></tr>
+                                <tr><td class="py-2 px-4 border-b">Gesamtvermögen (₹ Cr)</td><td class="py-2 px-4 border-b text-right">3.78.051,72</td><td class="py-2 px-4 border-b text-right">4.49.980,22</td><td class="py-2 px-4 border-b text-right">4.91.146,75</td><td class="py-2 px-4 border-b text-right">4.85.082,43</td><td class="py-2 px-4 border-b text-right">4.88.834,68</td></tr>
+                                <tr><td class="py-2 px-4 border-b">Gesamtkapital (₹ Cr)</td><td class="py-2 px-4 border-b text-right">35.913,38</td><td class="py-2 px-4 border-b text-right">40.996,34</td><td class="py-2 px-4 border-b text-right">45.470,32</td><td class="py-2 px-4 border-b text-right">49.178,57</td><td class="py-2 px-4 border-b text-right">52.667,77</td></tr>
+                                <tr><td class="py-2 px-4 border-b">Basic EPS (₹)</td><td class="py-2 px-4 border-b text-right">3,38</td><td class="py-2 px-4 border-b text-right">4,66</td><td class="py-2 px-4 border-b text-right">4,85</td><td class="py-2 px-4 border-b text-right">4,91</td><td class="py-2 px-4 border-b text-right">4,98</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Wachstum der verwalteten Vermögenswerte (AUM)</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">AUM GJ2025: 4.88.834,68 Cr ₹. CAGR über 5 Jahre: 18%. Zum 31. März 2023: 4,67 Lakh Cr ₹ (98,73% Indische Eisenbahnen, 1,27% RVNL/IRCON).</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Wichtige Finanzkennzahlen (aktuell)</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 text-center">
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">KGV (x)</p><p class="text-xl font-semibold">24,77-27,73</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">EPS (TTM) (₹)</p><p class="text-xl font-semibold">4,98</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">KBV (x)</p><p class="text-xl font-semibold">3,4-3,43</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">Dividendenrendite (%)</p><p class="text-xl font-semibold">1,17-1,77</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">Schulden/Eigenkapital (x)</p><p class="text-xl font-semibold">7,83</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">RoA (%)</p><p class="text-xl font-semibold">1,3</p></div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow"><p class="text-sm text-gray-500">RoE (%)</p><p class="text-xl font-semibold">12,8</p></div>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">Das hohe KBV (3,4x) im Vergleich zu Peers (<1,5x) und historischen Werten war durch niedriges Kreditrisiko und Steuerfreiheit gerechtfertigt. Die Diversifizierung könnte dies ändern, da Kreditrisiken und Steuern anfallen könnten, was den Markt veranlassen könnte, die Bewertung neu zu überdenken.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Cashflow-Analyse (GJ2025)</h3>
+                     <p class="text-gray-700 leading-relaxed mb-1">Nettocashflow aus operativen Aktivitäten: +8.229,57 Cr ₹ (positiv & steigend).</p>
+                     <p class="text-gray-700 leading-relaxed mb-1">Nettocashflow aus Investitionstätigkeiten: -0,10 Cr ₹ (nahezu vernachlässigbar).</p>
+                     <p class="text-gray-700 leading-relaxed mb-1">Nettocashflow aus Finanzierungstätigkeiten: -2.571,95 Cr ₹ (negativ, deutet auf Schuldenrückzahlung/Ausschüttung hin).</p>
+                     <p class="text-gray-700 leading-relaxed mb-4">Zahlungsmittelbestand (Ende GJ2025): 5.680,29 Cr ₹ (deutlich gestiegen). Dies deutet auf Liquiditätsansammlung hin, möglicherweise für zukünftige Diversifizierungsinvestitionen.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Neueste Quartalsergebnisse (Q4 GJ2025)</h3>
+                    <p class="text-gray-700 leading-relaxed mb-1">Nettogewinn: 1.681,87 Cr ₹.</p>
+                    <p class="text-gray-700 leading-relaxed mb-1">Gesamtumsatz: 6.723,80 Cr ₹.</p>
+                    <p class="text-gray-700 leading-relaxed mb-1">PAT-Wachstum (YoY): 3,14%.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Genehmigte Mittelbeschaffung für GJ2026: 60.000 Cr ₹. Günstigster Bieter für 5.000 Cr ₹ Darlehen an NTPC Renewable Energy.</p>
+                </div>
+            </section>
+
+            <section id="stockPerformance" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">V. Aktienentwicklung und Marktdynamik</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4">Die IRFC-Aktie hat erhebliche Volatilität gezeigt, mit einer deutlichen Korrektur in den letzten Monaten. Langfristig hat sie jedoch breitere Marktindizes übertroffen.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Aktienkursentwicklung (Stand: 22.-23. Mai 2025)</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-center">
+                        <div class="bg-gray-50 p-3 rounded-lg shadow"><p class="text-xs text-gray-500">Letzter Preis (₹)</p><p class="text-lg font-semibold">136,71-136,83</p></div>
+                        <div class="bg-gray-50 p-3 rounded-lg shadow"><p class="text-xs text-gray-500">52-Wochen-Hoch (₹)</p><p class="text-lg font-semibold">229,00</p></div>
+                        <div class="bg-gray-50 p-3 rounded-lg shadow"><p class="text-xs text-gray-500">52-Wochen-Tief (₹)</p><p class="text-lg font-semibold">108,04</p></div>
+                        <div class="bg-gray-50 p-3 rounded-lg shadow"><p class="text-xs text-gray-500">Marktkap. (₹ Cr)</p><p class="text-lg font-semibold">1.78.777</p></div>
+                        <div class="bg-gray-50 p-3 rounded-lg shadow"><p class="text-xs text-gray-500">Volumen (Aktien)</p><p class="text-lg font-semibold">~15 Mio.</p></div>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">Korrektur um ca. 46% vom Höchststand (229 ₹ auf 124 ₹) in 10 Monaten. Dies wird auf einen vorherigen "Ansturm auf PSU-Aktien" zurückgeführt, der zu überhöhten Bewertungen führte. Der Rückgang könnte die Aktie zu "vernünftigeren Bewertungen" bringen.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Vergleich mit Indizes und Sektor (Renditen)</h3>
+                    <div class="chart-container h-96 sm:h-[450px] md:h-[500px] max-w-full mb-6">
+                        <canvas id="returnsComparisonChart"></canvas>
+                    </div>
+                     <p class="text-sm text-gray-600 mt-2 text-center mb-4">Vergleichende Aktienrenditen über verschiedene Zeiträume.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Langfristig (3J: +538,83%, 5J: +425,81%) starke Outperformance gegenüber Nifty50 und Sensex. Kurzfristig (1J: -21,09%) Underperformance.</p>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Handelsvolumen und Volatilität</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">Beta-Werte variieren stark (0,35, 1,05, 1,77), was auf unterschiedliche Berechnungsmethoden hindeutet. Klassifizierung als "moderates Risiko". Anleger sollten die Quelle und Berechnung von Beta kritisch prüfen.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Dividendenhistorie und -rendite</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">Konsistente Dividendenzahlungen (halbjährlich). Prognostizierte jährliche Ausschüttung: 2,30 ₹.</p>
+                    <p class="text-gray-700 leading-relaxed mb-1">Dividendenrendite: 1,17% - 1,77% (höher als Branchendurchschnitt 1,17%).</p>
+                    <p class="text-gray-700 leading-relaxed mb-1">TTM-Ausschüttungsquote: 46,23%.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">5-Jahres-Dividendenwachstum: +24,73%.</p>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left">Ex-Datum</th>
+                                    <th class="py-2 px-4 border-b text-left">Zahlungsdatum</th>
+                                    <th class="py-2 px-4 border-b text-right">Betrag (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="py-2 px-4 border-b">21. März 2025</td><td class="py-2 px-4 border-b">16. April 2025</td><td class="py-2 px-4 border-b text-right">0,80</td></tr>
+                                <tr><td class="py-2 px-4 border-b">12. Nov. 2024</td><td class="py-2 px-4 border-b">04. Dez. 2024</td><td class="py-2 px-4 border-b text-right">0,80</td></tr>
+                                <tr><td class="py-2 px-4 border-b">22. Aug. 2024</td><td class="py-2 px-4 border-b">28. Sep. 2024</td><td class="py-2 px-4 border-b text-right">0,70</td></tr>
+                                <tr><td class="py-2 px-4 border-b">10. Nov. 2023</td><td class="py-2 px-4 border-b">02. Dez. 2023</td><td class="py-2 px-4 border-b text-right">0,80</td></tr>
+                                <tr><td class="py-2 px-4 border-b">15. Sep. 2023</td><td class="py-2 px-4 border-b">22. Okt. 2023</td><td class="py-2 px-4 border-b text-right">0,70</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="industry" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">VI. Branchenaussichten und Wettbewerbslandschaft</h2>
+                    <h3 class="text-xl font-semibold mb-3">Wachstumschancen im indischen Eisenbahnsektor</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">Indiens Eisenbahnnetz ist das viertgrößte weltweit. Der Sektor bietet hohes Wachstumspotenzial durch Regierungsinitiativen (DFC-Projekt, Modernisierung, Elektrifizierung).</p>
+                    <p class="text-gray-700 leading-relaxed mb-2">National Rail Plan 2030: Capex von 107 Mrd. USD (2026-2031).</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Prognosen bis 2031: Passagierverkehr +29%, Güterverkehr +157%, Rollmaterialbedarf +25%. Diese Pläne sichern eine nachhaltige Nachfrage nach IRFCs Kerndienstleistungen.</p>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Herausforderungen bei der Finanzierung</h3>
+                    <p class="text-gray-700 leading-relaxed mb-4">Finanzielle Engpässe bei Indischen Eisenbahnen durch populistische Preispolitik, Mangel an Privatsektorinvestitionen und Haushaltsherausforderungen. Dies unterstreicht die unverzichtbare Rolle der IRFC zur Mobilisierung externer Mittel.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Wettbewerbsstärken der IRFC</h3>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed mb-4 space-y-1">
+                        <li>Strategische Rolle für Indische Eisenbahnen.</li>
+                        <li>Solide Kreditratings (CRISIL AAA/A1+, ICRA AAA/A1+).</li>
+                        <li>Wettbewerbsfähige Kreditkosten.</li>
+                        <li>Starke, konstante Finanzleistung.</li>
+                        <li>Fundiertes Asset-Liability-Management.</li>
+                        <li>Erfahrenes Managementteam.</li>
+                        <li>Starke staatliche Unterstützung (86,36% Beteiligung, Navaratna-Status) führt zu nahezu null Kreditrisiko im Kerngeschäft.</li>
+                        <li>Risikoarmes Kerngeschäftsmodell (staatlich abgesicherte Kredite, null Kreditausfälle historisch).</li>
+                        <li>Historisch steuerfreier Status (könnte sich ändern).</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold mb-3">Wettbewerbsanalyse (Peers)</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">Branche: Finanzierung - Term-Lending Institutions. Peers: PFC, REC, HUDCO, IFCI, TFCILTD.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">Diversifizierung führt zu Wettbewerb mit etablierten Akteuren wie REC und PFC in Energie- & Infrastrukturfinanzierung. IRFC handelt zu höherem KBV (3x) als REC/PFC (<1,5x). Der Übergang vom Monopol zum Wettbewerber ist eine strategische Herausforderung.</p>
+                </div>
+            </section>
+
+            <section id="risksOpportunities" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">VII. Risiken und Chancen</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3 text-red-600">Risiken</h3>
+                            <div class="space-y-3">
+                                <details class="bg-red-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Herausforderungen bei Diversifizierung</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Langer Umsetzungszeitplan (<1% AUM nicht-Eisenbahn), intensiver Wettbewerb (REC, PFC), regulatorische Beschränkungen (Fokus auf "eisenbahnbezogene Infrastruktur"), mühsame Skalierung des neuen Kreditbuchs.</p>
+                                </details>
+                                <details class="bg-red-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Steueränderungen & Kreditrisiken</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Potenzieller Verlust des steuerfreien Status bei Ausdehnung über staatlich gesicherte Finanzierung. Einführung von Kreditrisiken bei neuen Kreditnehmern erfordert evtl. Rückstellungen. Dies könnte die Nettorentabilität schmälern und das Risikoprofil erhöhen.</p>
+                                </details>
+                                <details class="bg-red-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Abhängigkeit von Regierungspolitik</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Geschäftsmodell eng verbunden mit Investitions- & Politikentscheidungen der Regierung. Änderungen könnten Wachstum und Rentabilität beeinflussen.</p>
+                                </details>
+                                 <details class="bg-red-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Marktpositionsvulnerabilität</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Anfälligkeit für Wettbewerbsdruck in neuen Segmenten. Premium-Bewertung könnte bei Nichterreichen der Diversifizierungsziele oder Erosion der Vorteile korrigiert werden.</p>
+                                </details>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3 text-green-600">Chancen</h3>
+                            <div class="space-y-3">
+                                <details class="bg-green-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Fokus auf Eisenbahninfrastruktur</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Anhaltendes Engagement der Regierung (z.B. National Rail Plan 2030: 107 Mrd. USD Investitionen) sichert nachhaltige Nachfrage für IRFC-Dienstleistungen.</p>
+                                </details>
+                                <details class="bg-green-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Höhere Zinsspannen aus neuen Segmenten</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Management erwartet 3-5x höhere Spannen aus nicht-eisenbahnbezogenen Darlehen, was Rentabilität steigern könnte (bei erfolgreicher Umsetzung und Qualitätssicherung).</p>
+                                </details>
+                                <details class="bg-green-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Starkes Asset-Liability-Management</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Nachgewiesene Fähigkeit sorgt für finanzielle Stabilität und Vorhersehbarkeit (durchschnittliche Vermögenslaufzeit 8-9 Jahre).</p>
+                                </details>
+                                <details class="bg-green-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Attraktive Dividendenrendite</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Konstante Ausschüttungen und Rendite über Branchendurchschnitt machen Aktie für einkommensorientierte Anleger attraktiv.</p>
+                                </details>
+                                <details class="bg-green-50 p-3 rounded-lg">
+                                    <summary class="font-medium cursor-pointer">Navaratna-Status</summary>
+                                    <p class="text-sm text-gray-700 mt-2">Größere finanzielle und operative Autonomie kann schnellere Entscheidungen und aggressivere Verfolgung neuer Möglichkeiten erlauben.</p>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="valuation" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">VIII. Bewertung und Investitionsausblick</h2>
+                    <h3 class="text-xl font-semibold mb-3">Aktuelle Bewertungskennzahlen</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2">KGV: 24,77x - 27,73x.</p>
+                    <p class="text-gray-700 leading-relaxed mb-4">KBV: 3,4x - 3,43x (deutlich höher als Branchendurchschnitt 1,3x und historische Werte; Peers wie REC/PFC <1,5x). IPO erfolgte bei 0,9x-1x Buchwert.</p>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left">Unternehmen</th>
+                                    <th class="py-2 px-4 border-b text-right">KGV (x)</th>
+                                    <th class="py-2 px-4 border-b text-right">KBV (x)</th>
+                                    <th class="py-2 px-4 border-b text-right">Dividendenrendite (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="py-2 px-4 border-b">IRFC</td><td class="py-2 px-4 border-b text-right">27,57</td><td class="py-2 px-4 border-b text-right">3,43</td><td class="py-2 px-4 border-b text-right">1,17</td></tr>
+                                <tr><td class="py-2 px-4 border-b">PFC</td><td class="py-2 px-4 border-b text-right">4,5-4,9</td><td class="py-2 px-4 border-b text-right">0,6-0,8</td><td class="py-2 px-4 border-b text-right">1,1-2,1</td></tr>
+                                <tr><td class="py-2 px-4 border-b">REC Ltd</td><td class="py-2 px-4 border-b text-right">5,1-6,5</td><td class="py-2 px-4 border-b text-right">0,6-0,7</td><td class="py-2 px-4 border-b text-right">1,8-2,3</td></tr>
+                                <tr><td class="py-2 px-4 border-b">HUDCO</td><td class="py-2 px-4 border-b text-right">5,3-6,5</td><td class="py-2 px-4 border-b text-right">0,6-0,7</td><td class="py-2 px-4 border-b text-right">1,8-2,3</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-3">Analysten-Kursziele und -prognosen</h3>
+                    <p class="text-gray-700 leading-relaxed mb-2"><span class="font-semibold text-red-600">Pessimistisch:</span> Einige Wall Street-Analysten: Durchschnittliches 1-Jahres-Ziel 51 ₹ (Abwärtspotenzial). Prognose: Umsatz CAGR -74%, Operativer Gewinn CAGR -75%, Nettogewinn CAGR +5% (nächstes Jahr).</p>
+                    <p class="text-gray-700 leading-relaxed mb-4"><span class="font-semibold text-green-600">Optimistisch:</span> Andere Experten: "Sehr attraktiv" langfristig, "enorme Renditen", "vermögensbildender Wert". Technische Analyse: "Kaufkandidat", Ziel 129,83-155,02 ₹ (nächste 3 Monate). Empfehlung: "HALTEN", Ziel 160 ₹ (wenn >142 ₹), Stop-Loss 123 ₹. Erwarteter Anstieg auf 140 ₹.</p>
+                    <p class="text-gray-700 leading-relaxed font-medium mb-4">Die extreme Divergenz in den Zielen (51 ₹ bis "vermögensbildend") und Prognosen spiegelt die tiefe Spaltung des Marktes wider. Pessimisten diskontieren die Aktie aufgrund der Erosion des "Burggrabens" und Diversifizierungsherausforderungen. Optimisten betonen staatliche Unterstützung, Investitionspipeline und höhere Spreads. Dies unterstreicht die hohe Unsicherheit.</p>
+
+                    <h3 class="text-xl font-semibold mb-3">Gesamtanlagethese für IRFC</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <h4 class="font-semibold text-green-700 mb-2">Bullische Argumente:</h4>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                <li>Strategische Rolle, staatliche Unterstützung (Navaratna).</li>
+                                <li>Stabiles, risikoarmes Kerngeschäft, vorhersehbare Einnahmen.</li>
+                                <li>Wettbewerbsfähige Kreditkosten (hohe Ratings).</li>
+                                <li>Massive Investitionen im Eisenbahnsektor sichern Nachfrage.</li>
+                                <li>Diversifizierung bietet Potenzial für höhere Margen.</li>
+                                <li>Aktuelle Korrektur als möglicher Einstiegspunkt.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-red-700 mb-2">Bärische Argumente:</h4>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                <li>Hohe Bewertung (KBV) im Vergleich zu Peers.</li>
+                                <li>Erosion des "Burggrabens" (Steuer, Kreditrisiko) durch Diversifizierung.</li>
+                                <li>Intensiver Wettbewerb in neuen Segmenten.</li>
+                                <li>Regulatorische Beschränkungen bei Diversifizierung.</li>
+                                <li>Große Diskrepanz bei Analystenprognosen signalisiert Unsicherheit.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-2xl font-semibold mb-4">IX. Fazit</h2>
+                    <p class="text-gray-700 leading-relaxed mb-3">Die IRFC ist ein einzigartiges PSU mit entscheidender Rolle in der Finanzierung der indischen Eisenbahninfrastruktur. Historische Stärken sind staatliche Unterstützung, geringes Kreditrisiko, wettbewerbsfähige Kosten und stabile Einnahmen. Navaratna-Status und Regierungspläne stützen die Nachfrage.</p>
+                    <p class="text-gray-700 leading-relaxed mb-3">Jedoch befindet sich IRFC in einer strategischen Übergangsphase durch Diversifizierung in margenstärkere, aber wettbewerbsintensivere Segmente mit neuen Risiken (Steuerstatus, Kreditrisiken). Die Premium-Bewertung könnte bei sich änderndem Risikoprofil und Unsicherheit bei der Umsetzung der Strategie neu bewertet werden.</p>
+                    <p class="text-gray-700 leading-relaxed">Extrem divergierende Analystenprognosen spiegeln die geteilte Marktmeinung wider. Eine Investition erfordert sorgfältige Abwägung. Attraktive Dividendenrendite und Exposure zum Infrastrukturwachstum stehen potenziellen Auswirkungen der Diversifizierung gegenüber. Der jüngste Kursrückgang könnte einen günstigeren Einstieg bieten, aber die langfristige Performance hängt von der erfolgreichen Umsetzung der Neuausrichtung ab.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-12 pt-8 border-t border-gray-300 text-center">
+    <p class="text-sm text-gray-600">&copy; 2025 Jonas Hartmann. Alle Daten basieren auf dem bereitgestellten Bericht. Nur zu Informationszwecken.</p>
+</footer>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab-button');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+
+                const target = tab.getAttribute('data-tab');
+                contents.forEach(content => {
+                    if (content.id === target) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+                // Scroll to top of content for better UX on tab change
+                window.scrollTo({ top: content.offsetTop - 100, behavior: 'smooth' });
+            });
+        });
+
+        // Chart.js helper function for wrapped labels
+        function wrapLabels(label, maxWidth) {
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        }
+        
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 10 }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('de-DE').format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        font: { size: 10 },
+                        maxRotation: 45,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: { size: 10 },
+                        callback: function(value) {
+                            return new Intl.NumberFormat('de-DE').format(value);
+                        }
+                    },
+                    beginAtZero: false 
+                }
+            }
+        };
+
+        // Ownership Chart
+        const ownershipData = {
+            labels: ['Indische Regierung', 'Kleinanleger', 'FPIs', 'Investmentfonds', 'Streubesitz (Rest)'],
+            datasets: [{
+                label: 'Eigentümerstruktur (%)',
+                data: [86.36, 10.68, 0.98, 0.21, (100 - 86.36 - 10.68 - 0.98 - 0.21)],
+                backgroundColor: ['#4A90E2', '#50C878', '#F2A900', '#E94E77', '#A0A0A0'],
+                borderColor: '#FFFFFF',
+                borderWidth: 2
+            }]
+        };
+        new Chart(document.getElementById('ownershipChart'), {
+            type: 'pie',
+            data: ownershipData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: {size: 10}, boxWidth:15 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed.toFixed(2) + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Financial Performance Charts
+        const fiscalYears = ['GJ 2021', 'GJ 2022', 'GJ 2023', 'GJ 2024', 'GJ 2025'];
+        const revenueValues = [15770.86, 20301.60, 23932.63, 26655.92, 27156.41];
+        const patValues = [4416.13, 6089.84, 6337.01, 6412.10, 6502.00];
+        const assetsValues = [378051.72, 449980.22, 491146.75, 485082.43, 488834.68];
+        const equityValues = [35913.38, 40996.34, 45470.32, 49178.57, 52667.77];
+
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: {
+                labels: fiscalYears,
+                datasets: [{
+                    label: 'Gesamtumsatz (₹ Cr)',
+                    data: revenueValues,
+                    borderColor: '#4A90E2',
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: commonChartOptions
+        });
+
+        new Chart(document.getElementById('patChart'), {
+            type: 'line',
+            data: {
+                labels: fiscalYears,
+                datasets: [{
+                    label: 'Gewinn nach Steuern (PAT) (₹ Cr)',
+                    data: patValues,
+                    borderColor: '#50C878',
+                    backgroundColor: 'rgba(80, 200, 120, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: commonChartOptions
+        });
+
+        new Chart(document.getElementById('assetsChart'), {
+            type: 'line',
+            data: {
+                labels: fiscalYears,
+                datasets: [{
+                    label: 'Gesamtvermögen (₹ Cr)',
+                    data: assetsValues,
+                    borderColor: '#F2A900',
+                     backgroundColor: 'rgba(242, 169, 0, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: commonChartOptions
+        });
+        
+        new Chart(document.getElementById('equityChart'), {
+            type: 'line',
+            data: {
+                labels: fiscalYears,
+                datasets: [{
+                    label: 'Gesamtkapital (₹ Cr)',
+                    data: equityValues,
+                    borderColor: '#E94E77',
+                    backgroundColor: 'rgba(233, 78, 119, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: commonChartOptions
+        });
+
+        // Stock Performance Comparison Chart
+        const returnsLabels = ['1 Tag', '1 Woche', '1 Monat', '3 Monate', '6 Monate', '1 Jahr', '3 Jahre', '5 Jahre', '10 Jahre'];
+        const irfcReturns = [-3.38, 8.91, 5.58, 10.01, -5.83, -21.09, 538.83, 425.81, 425.81];
+        const nifty50Returns = [-1.05, -0.97, 3.49, 7.64, 4.96, 9.7, 56.13, 178, 195.06];
+        const sensexReturns = [-1.06, -1.51, 3.35, 6.91, 4.65, 9.7, 53.78, 170.36, 193.67];
+        const industryReturns = [-3.27, 2.19, -0.6, 7.19, -10.6, -17.33, 447.04, 526.93, 329.51];
+        const sectorReturns = [-1.23, 1.08, 2.66, 12.09, 8.53, 16.01, 122.88, 506.41, 408.38];
+
+        new Chart(document.getElementById('returnsComparisonChart'), {
+            type: 'bar',
+            data: {
+                labels: returnsLabels.map(label => wrapLabels(label, 10)),
+                datasets: [
+                    { label: 'IRFC (%)', data: irfcReturns, backgroundColor: '#4A90E2' },
+                    { label: 'Nifty50 (%)', data: nifty50Returns, backgroundColor: '#50C878' },
+                    { label: 'Sensex (%)', data: sensexReturns, backgroundColor: '#F2A900' },
+                    { label: 'Branche (%)', data: industryReturns, backgroundColor: '#E94E77' },
+                    { label: 'Sektor (%)', data: sectorReturns, backgroundColor: '#9B59B6' }
+                ]
+            },
+            options: {
+                ...commonChartOptions,
+                scales: {
+                    x: { ...commonChartOptions.scales.x, ticks: { ...commonChartOptions.scales.x.ticks, autoSkip: false } },
+                    y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Rendite (%)', font: {size: 12}} }
+                },
+                plugins: {
+                    ...commonChartOptions.plugins,
+                    tooltip: {
+                         ...commonChartOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(2) + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Activate the first tab by default
+        if (tabs.length > 0) {
+            tabs[0].click();
+        }
+
+    </script>
+</body>
+</html>
